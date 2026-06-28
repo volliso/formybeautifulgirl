@@ -24,6 +24,7 @@
             flex-direction: column;
             padding: 20px;
             background-attachment: fixed;
+            overflow-x: hidden;
         }
 
         /* Декоративные круги */
@@ -171,6 +172,8 @@
             justify-content: center;
             border: 1px solid rgba(255, 255, 255, 0.3);
             transition: box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .prediction-box:hover {
@@ -184,8 +187,27 @@
             font-weight: 400;
             color: #4a1a2e;
             line-height: 1.8;
-            transition: opacity 0.3s ease;
             word-break: break-word;
+            opacity: 0;
+            transform: scale(0.5) translateY(30px);
+            transition: opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Когда послание видимо — оно выплывает */
+        .prediction-text.visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        /* Подсказка в боксе (пока нет послания) */
+        .prediction-text.hint {
+            opacity: 0.5;
+            transform: scale(1) translateY(0);
+            font-weight: 300;
+            font-size: 16px;
+            color: #ad1457;
+            letter-spacing: 0.5px;
         }
 
         @media (max-width: 480px) {
@@ -198,6 +220,9 @@
             .prediction-text {
                 font-size: 17px;
                 line-height: 1.7;
+            }
+            .prediction-text.hint {
+                font-size: 14px;
             }
         }
 
@@ -223,22 +248,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* ===== АНИМАЦИИ ===== */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(18px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
+        /* ===== АНИМАЦИЯ СЕРДЕЧКА ПРИ КЛИКЕ ===== */
         @keyframes heartBeat {
             0% { transform: scale(1); }
             25% { transform: scale(0.88); }
@@ -249,6 +259,26 @@
 
         .heart-beat {
             animation: heartBeat 0.4s ease;
+        }
+
+        /* ===== ДОПОЛНИТЕЛЬНАЯ АНИМАЦИЯ — МЕЛКИЕ СЕРДЕЧКИ ВЫЛЕТАЮТ ===== */
+        @keyframes floatHearts {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-120px) scale(0.3) rotate(40deg);
+            }
+        }
+
+        .floating-heart {
+            position: fixed;
+            font-size: 24px;
+            pointer-events: none;
+            z-index: 100;
+            animation: floatHearts 1.2s ease-out forwards;
         }
     </style>
 </head>
@@ -264,7 +294,7 @@
 
         <!-- ===== БЛОК С ПОСЛАНИЕМ ===== -->
         <div class="prediction-box" id="predictionBox">
-            <div class="prediction-text" id="predictionText">нажми на сердечко</div>
+            <div class="prediction-text hint" id="predictionText">Нажми на сердечко!</div>
         </div>
 
         <div class="subtitle">каждый раз — новое послание</div>
@@ -311,10 +341,10 @@
         // ============================================
         // ЛОГИКА БЕЗ ПОВТОРОВ
         // ============================================
-        let remainingPhrases = []; // Оставшиеся непоказанные фразы
+        let remainingPhrases = [];
         let clickCount = 0;
+        let isFirstClick = true; // Для показа подсказки
 
-        // Функция для перемешивания массива (алгоритм Фишера-Йетса)
         function shuffleArray(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -323,50 +353,94 @@
             return arr;
         }
 
-        // Инициализация — перемешиваем все фразы
         function resetPhrases() {
             remainingPhrases = shuffleArray([...phrases]);
         }
 
-        // Получить следующую фразу (без повторов)
         function getNextPhrase() {
-            // Если фразы закончились — перемешиваем заново
             if (remainingPhrases.length === 0) {
                 resetPhrases();
             }
-            // Берём последнюю фразу из списка (удаляем её)
             return remainingPhrases.pop();
         }
 
-        // Первоначальная инициализация
         resetPhrases();
 
+        // ============================================
+        // ЭЛЕМЕНТЫ
+        // ============================================
         const heartBtn = document.getElementById('heartBtn');
         const predictionText = document.getElementById('predictionText');
         const predictionBox = document.getElementById('predictionBox');
         const counterEl = document.getElementById('counter');
 
+        // ============================================
+        // ФУНКЦИЯ ПОКАЗА ПОСЛАНИЯ
+        // ============================================
         function showNewMessage() {
             const newPhrase = getNextPhrase();
+
+            // Убираем класс "hint" (подсказка)
+            predictionText.classList.remove('hint');
 
             // Меняем текст
             predictionText.textContent = newPhrase;
 
-            // Анимация появления
-            predictionBox.classList.remove('fade-in');
-            void predictionBox.offsetWidth;
-            predictionBox.classList.add('fade-in');
+            // Делаем видимым с эффектом выплывания
+            predictionText.classList.remove('visible');
+            void predictionText.offsetWidth; // триггер перезапуска анимации
+            predictionText.classList.add('visible');
 
             // Анимация сердечка
             heartBtn.classList.remove('heart-beat');
             void heartBtn.offsetWidth;
             heartBtn.classList.add('heart-beat');
 
+            // Летающие сердечки (эффект, будто из сердечка вылетают)
+            createFloatingHearts();
+
             // Счётчик
             clickCount++;
             counterEl.textContent = `❤️ ${clickCount} посланий`;
         }
 
+        // ============================================
+        // ЭФФЕКТ — МЕЛКИЕ СЕРДЕЧКА ВЫЛЕТАЮТ
+        // ============================================
+        function createFloatingHearts() {
+            const emojis = ['❤️', '💗', '💖', '💕', '💓'];
+            const rect = heartBtn.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for (let i = 0; i < 8; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                // Случайное смещение от центра
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 20 + Math.random() * 40;
+                const xOffset = Math.cos(angle) * distance;
+                const yOffset = Math.sin(angle) * distance - 20;
+                
+                heart.style.left = (centerX + xOffset) + 'px';
+                heart.style.top = (centerY + yOffset) + 'px';
+                heart.style.fontSize = (16 + Math.random() * 20) + 'px';
+                heart.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
+                
+                document.body.appendChild(heart);
+                
+                // Удаляем после анимации
+                setTimeout(() => {
+                    heart.remove();
+                }, 1500);
+            }
+        }
+
+        // ============================================
+        // ОБРАБОТЧИК КЛИКА
+        // ============================================
         heartBtn.addEventListener('click', showNewMessage);
 
         // ============================================
@@ -378,15 +452,14 @@
         }
 
         // ============================================
-        // ПЕРВОЕ ПОСЛАНИЕ ПРИ ЗАГРУЗКЕ
+        // ПРИ ЗАГРУЗКЕ — ПОКАЗЫВАЕМ ПОДСКАЗКУ
         // ============================================
         window.addEventListener('DOMContentLoaded', function() {
-            const firstPhrase = getNextPhrase();
-            predictionText.textContent = firstPhrase;
-            predictionBox.classList.add('fade-in');
-            setTimeout(() => {
-                predictionBox.classList.remove('fade-in');
-            }, 700);
+            // Показываем подсказку "Нажми на сердечко!"
+            predictionText.classList.add('hint');
+            predictionText.textContent = 'Нажми на сердечко!';
+            // Делаем её видимой (без анимации выплывания)
+            predictionText.classList.add('visible');
         });
     </script>
 
