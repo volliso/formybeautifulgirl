@@ -262,7 +262,7 @@
 
         <button class="heart-btn" id="heartBtn">❤️</button>
 
-        <!-- ===== БЛОК С ПОСЛАНИЕМ — ОДИН РОВНЫЙ ШРИФТ ===== -->
+        <!-- ===== БЛОК С ПОСЛАНИЕМ ===== -->
         <div class="prediction-box" id="predictionBox">
             <div class="prediction-text" id="predictionText">нажми на сердечко</div>
         </div>
@@ -273,7 +273,7 @@
 
     <script>
         // ============================================
-        // ТВОИ ФРАЗЫ — БЕЗ ЭМОДЗИ
+        // ТВОИ ФРАЗЫ — ДЛИННЫЕ ТИРЕ (—)
         // ============================================
         const phrases = [
             "С тобой хочется говорить часами",
@@ -293,11 +293,11 @@
             "Ты красива во всем",
             "Ты выглядишь потрясающе в любое время суток и в любом состоянии",
             "Ты притягиваешь людей",
-            "Ты - воплощение изящности",
+            "Ты — воплощение изящности",
             "Ты неотразима даже когда не стараешься",
             "Никогда не сдавайся и иди к своей цели до конца",
             "Твое прошлое не определяет твое будущее. Ты можешь начать с чистого листа в любой момент",
-            "Ты как вино - с каждым годом только лучше",
+            "Ты как вино — с каждым годом только лучше",
             "Ты вдохновляешь меня",
             "Ты все сможешь",
             "Ты талантлива во всем",
@@ -309,19 +309,37 @@
         ];
 
         // ============================================
-        // ЛОГИКА
+        // ЛОГИКА БЕЗ ПОВТОРОВ
         // ============================================
-        let lastIndex = -1;
+        let remainingPhrases = []; // Оставшиеся непоказанные фразы
         let clickCount = 0;
 
-        function getRandomPhrase() {
-            let randomIndex;
-            do {
-                randomIndex = Math.floor(Math.random() * phrases.length);
-            } while (randomIndex === lastIndex && phrases.length > 1);
-            lastIndex = randomIndex;
-            return phrases[randomIndex];
+        // Функция для перемешивания массива (алгоритм Фишера-Йетса)
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
         }
+
+        // Инициализация — перемешиваем все фразы
+        function resetPhrases() {
+            remainingPhrases = shuffleArray([...phrases]);
+        }
+
+        // Получить следующую фразу (без повторов)
+        function getNextPhrase() {
+            // Если фразы закончились — перемешиваем заново
+            if (remainingPhrases.length === 0) {
+                resetPhrases();
+            }
+            // Берём последнюю фразу из списка (удаляем её)
+            return remainingPhrases.pop();
+        }
+
+        // Первоначальная инициализация
+        resetPhrases();
 
         const heartBtn = document.getElementById('heartBtn');
         const predictionText = document.getElementById('predictionText');
@@ -329,7 +347,7 @@
         const counterEl = document.getElementById('counter');
 
         function showNewMessage() {
-            const newPhrase = getRandomPhrase();
+            const newPhrase = getNextPhrase();
 
             // Меняем текст
             predictionText.textContent = newPhrase;
@@ -363,7 +381,7 @@
         // ПЕРВОЕ ПОСЛАНИЕ ПРИ ЗАГРУЗКЕ
         // ============================================
         window.addEventListener('DOMContentLoaded', function() {
-            const firstPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+            const firstPhrase = getNextPhrase();
             predictionText.textContent = firstPhrase;
             predictionBox.classList.add('fade-in');
             setTimeout(() => {
