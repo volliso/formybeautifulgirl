@@ -6,7 +6,7 @@
     <title>Моему котенку ❤️</title>
     <style>
         /* ===== ПОДКЛЮЧАЕМ ШРИФТЫ ===== */
-        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Marck+Script&family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@1,600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap');
 
         * {
             margin: 0;
@@ -60,31 +60,31 @@
             padding: 10px 0;
         }
 
-        /* ===== ЗАГОЛОВОК ===== */
+        /* ===== ЗАГОЛОВОК — ТОЛЬКО ЗДЕСЬ РАСПИСНОЙ ШРИФТ ===== */
         .title {
-            font-family: 'Marck Script', cursive;
-            font-size: 28px;
+            font-family: 'Caveat', cursive;
+            font-size: 34px;
+            font-weight: 700;
             color: #880e4f;
             margin-bottom: 18px;
             letter-spacing: 1px;
-            text-shadow: 0 2px 15px rgba(236, 64, 122, 0.2);
+            text-shadow: 0 2px 15px rgba(236, 64, 122, 0.15);
             opacity: 0.85;
             word-break: break-word;
         }
         .title .star {
-            font-family: 'Montserrat', sans-serif;
             display: inline-block;
             animation: sparkle 2.5s infinite;
         }
 
         @keyframes sparkle {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.15); }
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
 
         @media (max-width: 480px) {
             .title {
-                font-size: 22px;
+                font-size: 28px;
                 margin-bottom: 14px;
             }
         }
@@ -154,7 +154,7 @@
             }
         }
 
-        /* ===== БЛОК С ПОСЛАНИЕМ ===== */
+        /* ===== БЛОК С ПОСЛАНИЕМ — ОДИН ШРИФТ ===== */
         .prediction-box {
             margin-top: 35px;
             padding: 30px 24px;
@@ -177,41 +177,15 @@
             box-shadow: 0 12px 40px rgba(233, 30, 99, 0.16);
         }
 
+        /* ===== ПОСЛАНИЕ — ТОЛЬКО ОДИН ШРИФТ ===== */
         .prediction-text {
-            font-size: 21px;
-            color: #4a1a2e;
-            line-height: 1.8;
-            font-weight: 400;
-            transition: opacity 0.3s ease;
-            word-break: break-word;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        /* РАЗНЫЕ ШРИФТЫ ДЛЯ РАЗНЫХ ФРАЗ (через JS) */
-        .prediction-text.font-caveat {
-            font-family: 'Caveat', cursive;
-            font-size: 26px;
-            font-weight: 600;
-        }
-        .prediction-text.font-marck {
-            font-family: 'Marck Script', cursive;
-            font-size: 28px;
-        }
-        .prediction-text.font-playfair {
-            font-family: 'Playfair Display', serif;
-            font-size: 23px;
-            font-style: italic;
-            font-weight: 600;
-        }
-        .prediction-text.font-montserrat {
             font-family: 'Montserrat', sans-serif;
             font-size: 20px;
             font-weight: 400;
-        }
-        .prediction-text.font-caveat-light {
-            font-family: 'Caveat', cursive;
-            font-size: 24px;
-            font-weight: 400;
+            color: #4a1a2e;
+            line-height: 1.8;
+            transition: opacity 0.3s ease;
+            word-break: break-word;
         }
 
         @media (max-width: 480px) {
@@ -224,21 +198,6 @@
             .prediction-text {
                 font-size: 17px;
                 line-height: 1.7;
-            }
-            .prediction-text.font-caveat {
-                font-size: 22px;
-            }
-            .prediction-text.font-marck {
-                font-size: 23px;
-            }
-            .prediction-text.font-playfair {
-                font-size: 19px;
-            }
-            .prediction-text.font-montserrat {
-                font-size: 17px;
-            }
-            .prediction-text.font-caveat-light {
-                font-size: 20px;
             }
         }
 
@@ -296,12 +255,14 @@
 <body>
 
     <div class="container">
+        <!-- ===== ЗАГОЛОВОК — РАСПИСНОЙ ШРИФТ ===== -->
         <div class="title">
-            <span class="star">✦</span> МОЕМУ КОТЕНКУ <span class="star">✦</span>
+            <span class="star">✦</span> Моему котенку <span class="star">✦</span>
         </div>
 
         <button class="heart-btn" id="heartBtn">❤️</button>
 
+        <!-- ===== БЛОК С ПОСЛАНИЕМ — ОДИН ШРИФТ ===== -->
         <div class="prediction-box" id="predictionBox">
             <div class="prediction-text" id="predictionText">нажми на сердечко</div>
         </div>
@@ -312,7 +273,7 @@
 
     <script>
         // ============================================
-        // ТВОИ ФРАЗЫ — БЕЗ ЭМОДЗИ (оригинал)
+        // ТВОИ ФРАЗЫ — БЕЗ ЭМОДЗИ
         // ============================================
         const phrases = [
             "С тобой хочется говорить часами",
@@ -348,17 +309,6 @@
         ];
 
         // ============================================
-        // РАЗНЫЕ ШРИФТЫ (классы CSS)
-        // ============================================
-        const fontClasses = [
-            'font-caveat',
-            'font-marck',
-            'font-playfair',
-            'font-montserrat',
-            'font-caveat-light'
-        ];
-
-        // ============================================
         // ЛОГИКА
         // ============================================
         let lastIndex = -1;
@@ -373,26 +323,16 @@
             return phrases[randomIndex];
         }
 
-        function getRandomFontClass() {
-            return fontClasses[Math.floor(Math.random() * fontClasses.length)];
-        }
-
         const heartBtn = document.getElementById('heartBtn');
         const predictionText = document.getElementById('predictionText');
         const predictionBox = document.getElementById('predictionBox');
         const counterEl = document.getElementById('counter');
 
         function showNewMessage() {
-            // Новая фраза
             const newPhrase = getRandomPhrase();
-            const fontClass = getRandomFontClass();
 
-            // Меняем текст и шрифт
+            // Меняем текст
             predictionText.textContent = newPhrase;
-            // Убираем все классы шрифтов
-            fontClasses.forEach(cls => predictionText.classList.remove(cls));
-            // Добавляем новый
-            predictionText.classList.add(fontClass);
 
             // Анимация появления
             predictionBox.classList.remove('fade-in');
@@ -423,13 +363,9 @@
         // ПЕРВОЕ ПОСЛАНИЕ ПРИ ЗАГРУЗКЕ
         // ============================================
         window.addEventListener('DOMContentLoaded', function() {
-            // Случайная фраза + случайный шрифт
             const firstPhrase = phrases[Math.floor(Math.random() * phrases.length)];
-            const firstFont = fontClasses[Math.floor(Math.random() * fontClasses.length)];
             predictionText.textContent = firstPhrase;
-            predictionText.classList.add(firstFont);
             predictionBox.classList.add('fade-in');
-            // Убираем анимацию через секунду
             setTimeout(() => {
                 predictionBox.classList.remove('fade-in');
             }, 700);
